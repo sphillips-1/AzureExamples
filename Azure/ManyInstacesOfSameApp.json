@@ -18,10 +18,21 @@
     "functions": [],
     "variables": {
         "appName":"sean-phillips-demo",
-        "instances": ["alpha","beta","charlie","delta"]
+        "instances": ["alpha","beta","charlie","delta"],
+        "servicePlan": "[concat('service-plan-',variables('appName'))]"
     },
     "resources": [
-
+        {
+            "name": "[variables('servicePlan')]",
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "Tier": "Free",
+                "Name": "F1"
+            },
+            "properties": {}
+        },
         {
             "name": "[concat(variables('appName'),'-',variables('instances')[copyIndex()])]",
             "type": "Microsoft.Web/sites",
@@ -33,7 +44,7 @@
                 "count": "[length(variables('instances'))]"
             },
             "properties": {
-                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlan'))]",
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlan'))]",
                 "siteConfig": {
                     "alwaysOn": "[parameters('alwaysOn')]"
                 }
