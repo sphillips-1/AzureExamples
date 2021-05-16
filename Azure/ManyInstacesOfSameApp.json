@@ -81,7 +81,7 @@
                 "count": "[length(variables('instances'))]"
             },
             "properties": {
-                "ASPNETCORE_ENVIRONMENT": "[parameters('ASPNETCORE_ENVIRONMENT')]",
+                "ASPNETCORE_ENVIRONMENT": "[parameters('ASPNETCORE_ENVIRONMENT')]"
             }
 
         }
