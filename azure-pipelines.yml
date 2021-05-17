@@ -25,6 +25,7 @@ stages:
         templateLocation: 'Linked artifact'
         csmFile: '**/Azure/ManyInstacesOfSameApp.json'
         deploymentMode: 'Incremental'
+        
     # - task: AzureResourceManagerTemplateDeployment@3
     #   displayName: 'Delete Resource Group'
     #   inputs:
