@@ -21,14 +21,20 @@
         
     },
     "resources": [
-
+        
+        {
+            "name": "[variables('resourceGroupName')]",
+            "type": "Microsoft.Resources/resourceGroups",
+            "apiVersion": "2021-04-01",
+            "location": "eastus2",
+            "tags": {},
+            "properties": {}
+        },
         {
             "name": "[variables('servicePlan')]",
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2018-02-01",
-            "dependsOn":[
-                "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"
-            ],
+            //"dependsOn":["[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"],
             "location": "[resourceGroup().location]",
             "sku": {
                 "Tier": "Free",
@@ -42,7 +48,7 @@
             "type": "Microsoft.Web/sites",
             "apiVersion": "2018-11-01",
             "dependsOn":[
-                "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
+                //"[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
                 "[resourceId('Microsoft.Web/serverfarms',variables('servicePlan'))]"
             ],
             "location": "[resourceGroup().location]",
@@ -63,7 +69,7 @@
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2018-11-01",
             "dependsOn": [
-                "[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
+                //"[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
                 "[resourceId('Microsoft.Web/sites', concat(variables('appName'),'-',variables('instances')[copyIndex()]))]",
                 "[resourceId('Microsoft.Web/serverfarms',variables('servicePlan'))]"
             ],
