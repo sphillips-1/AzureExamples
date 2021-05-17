@@ -28,10 +28,7 @@
             "apiVersion": "2021-04-01",
             "location": "eastus2",
             "tags": {},
-            "properties": {},
-            "resources":{
-                
-            }
+            "properties": {}
         },
         {
             "name": "[variables('servicePlan')]",
