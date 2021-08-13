@@ -1,0 +1,37 @@
+# File: template_build_dotnet.yml
+
+parameters:
+- name: projectPath
+- name: extraParameter
+
+stages:
+- stage: 
+  jobs:
+  - job: 
+    steps:
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '${{ parameters.projectPath }}'
+        
+    - task: DotNetCoreCLI@2
+      displayName: Build
+      inputs:
+        command: 'build'
+        projects: '${{ parameters.projectPath }}'
+    
+    - task: DotNetCoreCLI@2
+      displayName: Publish
+      inputs:
+        command: publish
+        publishWebProjects: true
+        projects: '${{ parameters.projectPath }}'
+        arguments: '--output $(build.artifactstagingdirectory)'
+        zipAfterPublish: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
