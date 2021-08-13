@@ -1,17 +1,7 @@
 {
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
-    "parameters": {
-        "ASPNETCORE_ENVIRONMENT": {
-            "type": "string",
-            "defaultValue": "development"
-        },
-        "alwaysOn": {
-            "type": "bool",
-            "defaultValue": false
-        }
-
-    },
+    "parameters": {},
     "functions": [],
     "variables": {
         "resourceGroupName":"sean-phillips-demo",
@@ -34,7 +24,6 @@
             "name": "[variables('servicePlan')]",
             "type": "Microsoft.Web/serverfarms",
             "apiVersion": "2018-02-01",
-            //"dependsOn":["[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]"],
             "location": "[resourceGroup().location]",
             "sku": {
                 "Tier": "Free",
@@ -48,7 +37,6 @@
             "type": "Microsoft.Web/sites",
             "apiVersion": "2018-11-01",
             "dependsOn":[
-                //"[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
                 "[resourceId('Microsoft.Web/serverfarms',variables('servicePlan'))]"
             ],
             "location": "[resourceGroup().location]",
@@ -59,7 +47,7 @@
             "properties": {
                 "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('servicePlan'))]",
                 "siteConfig": {
-                    "alwaysOn": "[parameters('alwaysOn')]"
+                    "alwaysOn": false
                 }
             }
 
@@ -69,16 +57,12 @@
             "type": "Microsoft.Web/sites/config",
             "apiVersion": "2018-11-01",
             "dependsOn": [
-                //"[resourceId('Microsoft.Resources/resourceGroups', variables('resourceGroupName'))]",
                 "[resourceId('Microsoft.Web/sites', concat(variables('appName'),'-',variables('instances')[copyIndex()]))]",
                 "[resourceId('Microsoft.Web/serverfarms',variables('servicePlan'))]"
             ],
             "copy": {
                 "name": "appsettingscopy",
                 "count": "[length(variables('instances'))]"
-            },
-            "properties": {
-                "ASPNETCORE_ENVIRONMENT": "[parameters('ASPNETCORE_ENVIRONMENT')]"
             }
 
         }
