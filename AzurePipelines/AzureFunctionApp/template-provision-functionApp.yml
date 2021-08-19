@@ -12,7 +12,7 @@ pool:
 
 variables:
   resourceGroupName: SeanFunctionApp
-  azureResourceManagerConnection: 'Azure subscription 1(2cf64833-1e9f-4e52-ab37-4e7ea0e77717)'
+  azureResourceManagerConnection: 'servicePrincipal-Azure'
   subscriptionId: 2cf64833-1e9f-4e52-ab37-4e7ea0e77717
 
 stages:
@@ -35,16 +35,16 @@ stages:
   - job: FunctionApp
     steps:
     - task: AzureResourceManagerTemplateDeployment@3
-      displayName: 'Provision Function App'
       inputs:
-        deploymentScope: 'Subscription'
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(azureResourceManagerConnection)
         subscriptionId: $(subscriptionId)
         action: 'Create Or Update Resource Group'
-        resourceGroupName: $(resourceGroupName)
-        location: 'East US'
+        resourceGroupName: '$(resourceGroupName)'
+        location: 'East US 2'
         templateLocation: 'Linked artifact'
         csmFile: '**/Azure/AzureFunctionApp.json.json'
-        deploymentOutputs: Output
+        deploymentMode: 'Incremental'
 
 
 - stage: PostCleanUp
