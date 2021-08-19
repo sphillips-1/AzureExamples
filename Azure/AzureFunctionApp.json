@@ -108,5 +108,11 @@
             }
 
         }
-    ]
+    ],
+    "outputs": {
+        "databaseMigrationKey":{
+            "type": "string",
+            "value": "[listkeys(concat(resourceId('Microsoft.Web/sites', variables('functionApp')), '/host/default'), '2018-11-01').functionKeys.default]"
+        }
+    }
 }

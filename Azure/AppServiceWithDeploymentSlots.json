@@ -1,0 +1,73 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "servicePlan":{
+            "type": "string"
+        },
+        "webAppName":{
+            "type": "string"
+        }
+    },
+    "functions": [],
+    "variables": {},
+    "resources": [
+        //Web App
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[parameters('webAppName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn":[],
+            "properties": {
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('servicePlan'))]",
+                "siteConfig":{
+                    "appSettings":[
+                        {
+                            "name": "stagingSlot",
+                            "value": "false"
+                        }
+                    ],
+                    "connectionStrings":[]
+                }
+            },
+            "resources": [
+                {
+                    "apiVersion": "2015-08-01",
+                    "name": "swap",
+                    "type": "slots",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                    ],
+                    "resources":[],
+                    "properties": {
+                        "siteConfig":{
+                            "appSettings":[
+                                {
+                                    "name": "stagingSlot",
+                                    "value": "true"
+                                }
+                            ],
+                            "connectionStrings":[]
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2015-08-01",
+                    "name": "slotconfignames",
+                    "type": "config",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Web/Sites', parameters('webAppName'))]"
+                    ],
+                    "properties": {
+                        "appSettingNames": [ "stagingSlot" ]
+                    }
+                }
+            ]
+        }
+        
+    ],
+    "outputs": {
+    }
+}
