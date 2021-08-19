@@ -1,0 +1,112 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {
+        "storageAccountName":"[toLower('saSeanTestFunction')]",
+        "functionApp": "fa-SeanTestFunction",
+        "appServicePlan": "asp_SeanTestFunction",
+        "connectionString": "Server=.;Initial Catalog=Acquire;Integrated Security=True;"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('appServicePlan')]",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic"
+            },
+            "properties": {
+                "name": "[variables('appServicePlan')]",
+                "computeMode": "Dynamic"
+            }
+        },
+
+        //STORAGE ACCOUNT
+        {
+            "apiVersion": "2019-06-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            }
+        },
+
+        //APP INSIGHTS
+        {
+            "name": "[variables('functionApp')]",
+            "type": "microsoft.insights/components",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2020-02-02-preview",
+            "properties": {
+                "ApplicationId": "[variables('functionApp')]",
+                "Application_Type": "web"
+            }
+        },
+
+        //FUNCTION APPS
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "[variables('functionApp')]",
+            "location": "[resourceGroup().location]",
+            "kind": "functionapp",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Web/serverfarms/',variables('appServicePlan'))]",
+                "[concat('microsoft.insights/components/',variables('functionApp'))]"
+            ],
+            "properties": {
+                "name": "[variables('functionApp')]",
+                "siteConfig": {
+                    "appSettings": [
+                        {
+                            "name": "FUNCTIONS_EXTENSION_VERSION",
+                            "value": "~3"
+                        },
+                        {
+                            "name": "FUNCTIONS_WORKER_RUNTIME",
+                            "value": "dotnet"
+                        },
+                        {
+                            "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                            "value": "[reference(concat('microsoft.insights/components/',variables('functionApp')), '2020-02-02-preview').InstrumentationKey]"
+                        },
+                        {
+                            "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                            "value": "[reference(concat('microsoft.insights/components/',variables('functionApp')), '2020-02-02-preview').ConnectionString]"
+                        },
+                        {
+                            "name": "AzureWebJobsStorage",
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+                        },
+                        {
+                            "name": "DataMinerSchedule",
+                            "value": "*/15 * * * *"
+                        },
+                        {
+                            "name": "GenerateReportSchedule",
+                            "value": "0 */3 * * *"
+                        }
+                    ],
+                    "connectionStrings": [
+                        {
+                            "name":"connectionString_Example",
+                            "connectionString":"[variables('connectionString')]"
+                        }                    
+                    ]
+                },
+                "serverFarmId": "[variables('appServicePlan')]",
+                "clientAffinityEnabled": true
+            }
+
+        }
+    ]
+}
