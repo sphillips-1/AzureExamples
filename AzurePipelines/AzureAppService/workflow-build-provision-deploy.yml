@@ -1,0 +1,98 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: none
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-latest
+
+variables:
+  azureServicePrincipal: ''
+  resourceGroupName: ''
+  subscriptionId: ''
+  armTemplate: '**/template.json'
+  armParameters: '**/parameters.json'
+  environment: ''
+  appServiceName: ''
+
+
+stages:
+- stage: Build
+  jobs:
+  - job: VisualStudioProject
+    steps:
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '**/*.sln'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        projects: '**/*.sln'
+         
+    - task: DotNetCoreCLI@2
+      displayName: Publish
+      inputs:
+        command: publish
+        publishWebProjects: True
+        arguments: '--output "$(build.artifactstagingdirectory)"'
+        zipAfterPublish: True
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Artifact'
+      inputs:
+        PathtoPublish: '$(build.artifactstagingdirectory)'
+
+- stage: Provision
+  jobs:
+  - job: AzureAppService
+    steps:
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Deploy ARM Template'
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(azureServicePrincipal)
+        subscriptionId: $(subscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '$(resourceGroupName) '
+        location: 'East US'
+        templateLocation: 'Linked artifact'
+        csmFile: $(armTemplate)
+        csmParametersFile: $(armParameters)
+        deploymentMode: 'Incremental'
+
+- stage: Deploy
+  jobs:
+  - deployment: AzureAppService
+    environment: $(environment)
+    strategy:
+      runOnce:
+        deploy:    
+          steps:
+          - download: current
+            patterns: '**/*.zip'
+
+          - task: AzureWebApp@1
+            inputs:
+              azureSubscription: $(azureServicePrincipal)
+              appType: 'webApp'
+              appName: $(appServiceName)
+              package: '$(Pipeline.Workspace)/**/*.zip'
+              deploymentMethod: 'auto'
+              resourceGroupName: $(resourceGroupName)
+              slotName: 'staging'
+
+          - task: AzureAppServiceManage@0
+            displayName: 'Swap Slots'
+            inputs:
+              azureSubscription: $(azureServicePrincipal)
+              WebAppName: $(appServiceName)
+              ResourceGroupName: $(resourceGroupName)
+              SourceSlot: staging
+
