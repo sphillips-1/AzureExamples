@@ -1,0 +1,37 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: none
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-latest
+
+variables:
+
+# Variable outside of case statement
+- name: testString
+  value: testABC
+
+# Variable group outside of case (Default) 
+- group: default
+
+# Change variable or variable group based on case (branch name)  
+- ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/dev') }}:
+  - name: testString
+    value: testABC
+
+  - group: dev
+
+ 
+name: $(environment)
+
+stages:
+- stage: Test
+  jobs:
+  - job: Variable
+    steps:
+    - pwsh: echo $(testString)
