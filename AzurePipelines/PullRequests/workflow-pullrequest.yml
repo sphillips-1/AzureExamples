@@ -1,0 +1,146 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: main
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-latest
+  demands:
+  - npm
+
+stages:
+- stage: Test
+  jobs:
+  - job: CSharp
+    steps:
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '**\**.sln'
+ 
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        projects: '**/*.sln'
+
+    - task: VSTest@2
+      displayName: 'Run C# Unit Tests and collect code coverage'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*.Test.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        codeCoverageEnabled: true        
+          
+  - job: JavaScript
+    steps:
+    - task: Npm@1
+      displayName: 'NPM Install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+
+    - task: Npm@1
+      displayName: 'NPM Build WebPack'
+      inputs:
+        command: custom
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+        customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: 'Run JavaScript Unit Tests and collect code coverage'
+      inputs:
+        command: custom
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+        customCommand: 'run test'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish JavaScript Unit Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/jest-junit-results.xml'
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()  
+
+  - job: SonarCloud
+    steps:
+    - task: SonarCloudPrepare@1
+      inputs:
+        SonarCloud: 'sonarcloud'
+        organization: 'sphillips-1'
+        scannerMode: 'MSBuild'
+        projectKey: 'sphillips-1'
+        projectName: 'sphillips-1'
+        extraProperties: 'sonar.cs.vstest.reportsPaths=**\TestResults\*.trx'
+
+    - task: DotNetCoreCLI@2
+      displayName: Restore
+      inputs:
+        command: 'restore'
+        projects: '**\**.sln'
+ 
+    - task: DotNetCoreCLI@2
+      displayName: 'Build'
+      inputs:
+        projects: '**/*.sln'
+
+    - task: VSTest@2
+      displayName: 'Run C# Unit Tests and collect code coverage'
+      inputs:
+        testSelector: 'testAssemblies'
+        testAssemblyVer2: |
+          **\*.Test.dll
+          !**\*TestAdapter.dll
+          !**\obj\**
+        searchFolder: '$(System.DefaultWorkingDirectory)'
+        codeCoverageEnabled: true
+
+    - task: Npm@1
+      displayName: 'NPM Install'
+      inputs:
+        command: install
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+
+    - task: Npm@1
+      displayName: 'NPM Build WebPack'
+      inputs:
+        command: custom
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+        customCommand: 'run build'
+
+    - task: Npm@1
+      displayName: 'Run JavaScript Unit Tests and collect code coverage'
+      inputs:
+        command: custom
+        workingDir: $(System.DefaultWorkingDirectory)
+        verbose: false
+        customCommand: 'run test'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish JavaScript Unit Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: '**/jest-junit-results.xml'
+        failTaskOnFailedTests: true
+      condition: succeededOrFailed()
+
+    - task: SonarCloudAnalyze@1
+      condition: succeededOrFailed()
+
+    - task: SonarCloudPublish@1
+      inputs:
+        pollingTimeoutSec: '300'
+      condition: succeededOrFailed()
