@@ -35,3 +35,5 @@ stages:
   - job: Variable
     steps:
     - pwsh: echo $(testString)
+    - pwsh: echo $(variableOne)
+    - pwsh: echo $(variableTwo)
