@@ -17,6 +17,13 @@ stages:
   jobs:
   - job: Terraform
     steps:  
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'servicePrincipal-Azure'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          call az group crete --location eastus --name testresourcegroup
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
