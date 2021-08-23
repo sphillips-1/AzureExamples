@@ -23,7 +23,7 @@ stages:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          call az group crete --location eastus --name testresourcegroup
+          az group create --location eastus --name testresourcegroup
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
