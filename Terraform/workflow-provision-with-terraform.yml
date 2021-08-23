@@ -1,0 +1,19 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: none
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-latest
+  demands:
+  - npm
+
+stages:
+- stage: Provision
+  jobs:
+  - job: Terraform
+    steps:  
