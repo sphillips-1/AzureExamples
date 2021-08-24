@@ -10,10 +10,6 @@ terraform {
   }
 }
 
-provider "azurerm" {
-  features {}
-}
-
 resource "azurerm_storage_account" "main" {
   name                     = "seanterraformstorageaccount"
   resource_group_name      = azurerm_resource_group.main.name
