@@ -51,7 +51,7 @@
     "outputs": {
         "storageAccountKey":{
             "type": "string",
-            "value": "[listkeys(concat(resourceId('Microsoft.Web/sites', parameters('storageAccountName')), '/host/default'), '2018-11-01').functionKeys.default]"
+            "value": "[listkeys(concat(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '/host/default'), '2018-11-01').functionKeys.default]"
         }
     }
 }
