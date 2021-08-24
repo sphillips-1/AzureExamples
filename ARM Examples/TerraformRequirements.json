@@ -1,0 +1,57 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "storageAccountName":{
+            "type": "string",
+            "defaultValue": "saterraformrequirements"
+        },
+        "storageContainerName":{
+            "type": "string",
+            "defaultValue": "terraform"
+        }
+
+    },
+    "variables": {},
+    "resources": [
+
+        //STORAGE ACCOUNT
+        {
+            "apiVersion": "2019-06-01",
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[parameters('storageAccountName')]",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "properties": {
+                "supportsHttpsTrafficOnly": true
+            },
+            "resources":[
+                {
+                    "name": "[parameters('storageContainerName')]",
+                    "type": "containers",
+                    "apiVersion": "2021-02-01",
+                    "dependsOn":[
+                        "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
+                    ],
+                    "properties": {
+                        "defaultEncryptionScope": "string",
+                        "denyEncryptionScopeOverride": "boolean",
+                        "publicAccess": "string",
+                        "metadata": {}
+                    },
+                    "resources": []
+                }
+            ]
+
+        }
+    ],
+    "outputs": {
+        "storageAccountKey":{
+            "type": "string",
+            "value": "[listkeys(concat(resourceId('Microsoft.Web/sites', parameters('storageAccountName')), '/host/default'), '2018-11-01').functionKeys.default]"
+        }
+    }
+}
