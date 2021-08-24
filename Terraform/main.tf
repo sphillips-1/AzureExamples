@@ -1,6 +1,6 @@
 terraform {
 
-  required_version = ">=0.12"
+  required_version = ">=1.0.0"
   
   required_providers {
     azurerm = {
@@ -8,6 +8,10 @@ terraform {
       version = "~>2.0"
     }
   }
+}
+
+provider "azurerm" {
+  features {}
 }
 
 resource "azurerm_storage_account" "main" {
