@@ -32,6 +32,27 @@ stages:
           az storage container create --name $(storageContainerName) --account-name $(storageAccountName) --resource-group $(resourceGroupName)
           az storage account keys list -g $(resourceGroupName) -n $(storageAccountName) 
  
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: 'servicePrincipal-Azure'
+        scriptType: 'ps'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+        $key =(Get-AzureRMStorageAccountKey -ResourceGroupName $(resourceGroupName) -AccountName $(storageAccountName)).value(0)
+        Write-Host "##vso[task.setvariable variable=storagekey]$key"
+   
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
+
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        backendServiceArm: 'servicePrincipal-Azure'
+        backendAzureRmResourceGroupName: '$(resourceGroupName)'
+        backendAzureRmStorageAccountName: '$(storageAccountName)'
+        backendAzureRmContainerName: '$(storageContainerName)'
+        backendAzureRmKey: 'idk'
+
