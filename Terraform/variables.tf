@@ -1,5 +1,5 @@
 variable "resource_group_name" {
-  default = "myResourceGroup"
+  default = "AzureFunctionApp"
 }
 
 variable "resource_group_location" {
