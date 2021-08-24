@@ -41,9 +41,12 @@ stages:
     - pwsh: |
         $outputsObject = $env:output | ConvertFrom-Json
         Write-Host "##vso[task.setvariable variable=storageAccountKey]$($outputsObject.storageAccountKey.value)"
-        echo $(storageAccountKey)
       displayName: 'Get Storage Account Key'
-             
+
+    - pwsh: |
+        echo $(storageAccountKey)
+      displayName: 'Echo Storage Account Key'
+
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.31'
