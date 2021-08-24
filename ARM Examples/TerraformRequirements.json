@@ -50,8 +50,8 @@
     ],
     "outputs": {
         "storageAccountKey":{
-            "type": "string",
-            "value": "[listkeys(concat(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '/host/default'), '2018-11-01').functionKeys.default]"
+        "type": "string",
+        "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName')), '2019-06-01').keys[0].value]"
         }
     }
 }
