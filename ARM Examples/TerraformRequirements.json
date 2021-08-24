@@ -36,12 +36,7 @@
                     "dependsOn":[
                         "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccountName'))]"
                     ],
-                    "properties": {
-                        "defaultEncryptionScope": "string",
-                        "denyEncryptionScopeOverride": "boolean",
-                        "publicAccess": "string",
-                        "metadata": {}
-                    },
+                    "properties": {},
                     "resources": []
                 }
             ]
