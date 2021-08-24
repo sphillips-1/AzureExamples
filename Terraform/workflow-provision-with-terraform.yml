@@ -14,14 +14,10 @@ variables:
   resourceGroupName: TerraformRequirements
   storageAccountName: saterraformrequirements
   storageContainerName: terraform
-  azureServicePrincipal: ''
-  resourceGroupName: ''
-  subscriptionId: ''
+  azureServicePrincipal: 'servicePrincipal-Azure'
+  subscriptionId: '2cf64833-1e9f-4e52-ab37-4e7ea0e77717'
   armTemplate: '**/TerraformRequirements.json'
   armParameters: '**/parameters.json'
-  environment: ''
-  appServiceName: ''
-
 
 stages:
 - stage: Provision
