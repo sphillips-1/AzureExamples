@@ -57,3 +57,19 @@ stages:
         backendAzureRmStorageAccountName: '$(storageAccountName)'
         backendAzureRmContainerName: '$(storageContainerName)'
         backendAzureRmKey: '$(storageAccountKey)'
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+    - task: TerraformTaskV2@2
+      inputs:
+        provider: 'azurerm'
+        command: 'destroy'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
