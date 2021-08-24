@@ -45,7 +45,7 @@ stages:
         echo $(storageAccountKey)
     - task: TerraformInstaller@0
       inputs:
-        terraformVersion: '0.12.3'
+        terraformVersion: '0.12.31'
 
     - task: TerraformTaskV2@2
       inputs:

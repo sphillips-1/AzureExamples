@@ -4,7 +4,7 @@ terraform {
     azurerm = "2.73.0"
   }
 
-  required_version = ">= 0.12.3"
+  required_version = ">= 0.12.31"
 
 }
 
