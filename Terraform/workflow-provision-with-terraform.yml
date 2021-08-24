@@ -26,7 +26,7 @@ stages:
     steps:  
 
     - task: AzureResourceManagerTemplateDeployment@3
-      displayName: 'Deploy ARM Template'
+      displayName: 'Provision Terraform Resources'
       inputs:
         deploymentScope: 'Resource Group'
         azureResourceManagerConnection: $(azureServicePrincipal)
@@ -41,8 +41,9 @@ stages:
     - pwsh: |
         $outputsObject = $env:output | ConvertFrom-Json
         Write-Host "##vso[task.setvariable variable=storageAccountKey]$($outputsObject.storageAccountKey.value)"
-    - pwsh: |
         echo $(storageAccountKey)
+      displayName: 'Get Storage Account Key'
+             
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.31'
@@ -57,18 +58,24 @@ stages:
         backendAzureRmStorageAccountName: '$(storageAccountName)'
         backendAzureRmContainerName: '$(storageContainerName)'
         backendAzureRmKey: '$(storageAccountKey)'
+
     - task: TerraformTaskV2@2
+      displayName: 'Terraform Plan'
       inputs:
         provider: 'azurerm'
         command: 'plan'
         workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+
     - task: TerraformTaskV2@2
+      displayName: 'Terraform Apply'
       inputs:
         provider: 'azurerm'
         command: 'apply'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+
     - task: TerraformTaskV2@2
+      displayName: 'Terraform Destroy'
       inputs:
         provider: 'azurerm'
         command: 'destroy'
