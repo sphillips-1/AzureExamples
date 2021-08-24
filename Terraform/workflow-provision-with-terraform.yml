@@ -9,8 +9,12 @@ pr: none
 pool:
   name: Azure Pipelines
   vmImage: windows-latest
-  demands:
-  - npm
+
+variables:
+  resourceGroupName: TerraformRequirements
+  storageAccountName: saterraformrequirements
+  storageContainerName: terraform
+
 
 stages:
 - stage: Provision
@@ -23,11 +27,11 @@ stages:
         scriptType: 'ps'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az group create --location eastus --name TerraformRequirements
-          az storage account create --name saterraformrequirements --location eastus --sku Standard_LRS
-          az storage container create --name terraform --account-name terraformrequirements
-          az storage account keys list -g TerraformRequirements -n saterraformrequirements
-
+          az group create --location eastus --name $(resourceGroupName)
+          az storage account create --name $(storageAccountName) --location eastus --sku Standard_LRS --resource-group $(resourceGroupName)
+          az storage container create --name $(storageContainerName) --account-name $(storageAccountName) --resource-group $(resourceGroupName)
+          az storage account keys list -g $(resourceGroupName) -n $(storageAccountName) 
+ 
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
