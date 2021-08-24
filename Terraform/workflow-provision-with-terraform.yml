@@ -14,6 +14,13 @@ variables:
   resourceGroupName: TerraformRequirements
   storageAccountName: saterraformrequirements
   storageContainerName: terraform
+  azureServicePrincipal: ''
+  resourceGroupName: ''
+  subscriptionId: ''
+  armTemplate: '**/TerraformRequirements.json'
+  armParameters: '**/parameters.json'
+  environment: ''
+  appServiceName: ''
 
 
 stages:
@@ -21,26 +28,21 @@ stages:
   jobs:
   - job: Terraform
     steps:  
-    - task: AzureCLI@2
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Deploy ARM Template'
       inputs:
-        azureSubscription: 'servicePrincipal-Azure'
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          az group create --location eastus --name $(resourceGroupName)
-          az storage account create --name $(storageAccountName) --location eastus --sku Standard_LRS --resource-group $(resourceGroupName)
-          az storage container create --name $(storageContainerName) --account-name $(storageAccountName) --resource-group $(resourceGroupName)
-          az storage account keys list -g $(resourceGroupName) -n $(storageAccountName) 
- 
-    - task: AzureCLI@2
-      inputs:
-        azureSubscription: 'servicePrincipal-Azure'
-        scriptType: 'ps'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-        $key =(Get-AzureRMStorageAccountKey -ResourceGroupName $(resourceGroupName) -AccountName $(storageAccountName)).value(0)
-        Write-Host "##vso[task.setvariable variable=storagekey]$key"
-   
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(azureServicePrincipal)
+        subscriptionId: $(subscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '$(resourceGroupName) '
+        location: 'East US'
+        templateLocation: 'Linked artifact'
+        csmFile: $(armTemplate)
+        deploymentMode: 'Incremental'
+        output
+
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
@@ -55,4 +57,3 @@ stages:
         backendAzureRmStorageAccountName: '$(storageAccountName)'
         backendAzureRmContainerName: '$(storageContainerName)'
         backendAzureRmKey: 'idk'
-
