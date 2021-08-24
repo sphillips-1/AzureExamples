@@ -41,8 +41,12 @@ stages:
         templateLocation: 'Linked artifact'
         csmFile: $(armTemplate)
         deploymentMode: 'Incremental'
-        output
-
+        deploymentOutputs: 'output'    
+    - pwsh: |
+        $outputsObject = $env:output | ConvertFrom-Json
+        Write-Host "##vso[task.setvariable variable=storageAccountKey]$($outputsObject.storageAccountKey.value)"
+    - pwsh: |
+        echo $(storageAccountKey)
     - task: TerraformInstaller@0
       inputs:
         terraformVersion: '0.12.3'
@@ -56,4 +60,4 @@ stages:
         backendAzureRmResourceGroupName: '$(resourceGroupName)'
         backendAzureRmStorageAccountName: '$(storageAccountName)'
         backendAzureRmContainerName: '$(storageContainerName)'
-        backendAzureRmKey: 'idk'
+        backendAzureRmKey: '$(storageAccountKey)'
