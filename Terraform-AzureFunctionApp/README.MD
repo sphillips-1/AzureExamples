@@ -1,3 +1,5 @@
+# Provisions Azure resources required for an Azure Function App with Terraform
+
 # Setup
 ## Download Powershell 7
 https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-windows?view=powershell-7.1
