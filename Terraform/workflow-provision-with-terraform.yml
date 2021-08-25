@@ -68,7 +68,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'plan'
-        workingDirectory: '**\Terraform'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\Terraform'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
 
     - task: TerraformTaskV2@2
@@ -76,6 +76,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'apply'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\Terraform'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
 
     - task: TerraformTaskV2@2
@@ -83,4 +84,5 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'destroy'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\Terraform'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
