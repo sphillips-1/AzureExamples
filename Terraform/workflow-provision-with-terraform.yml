@@ -56,7 +56,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'init'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\Terraform'
         backendServiceArm: 'servicePrincipal-Azure'
         backendAzureRmResourceGroupName: '$(resourceGroupName)'
         backendAzureRmStorageAccountName: '$(storageAccountName)'
@@ -68,7 +68,7 @@ stages:
       inputs:
         provider: 'azurerm'
         command: 'plan'
-        workingDirectory: '$(System.DefaultWorkingDirectory)/Terraform'
+        workingDirectory: '$(System.DefaultWorkingDirectory)\Terraform'
         environmentServiceNameAzureRM: '$(azureServicePrincipal)'
 
     - task: TerraformTaskV2@2
