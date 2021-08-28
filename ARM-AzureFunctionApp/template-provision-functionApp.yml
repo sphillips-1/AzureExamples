@@ -29,5 +29,5 @@ stages:
         resourceGroupName: '$(resourceGroupName)'
         location: 'East US 2'
         templateLocation: 'Linked artifact'
-        csmFile: '**/AzureFunctionApp/template.json'
+        csmFile: '**/ARM-AzureFunctionApp/template.json'
         deploymentMode: 'Incremental'

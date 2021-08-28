@@ -1,0 +1,82 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr: none
+
+pool:
+  name: Azure Pipelines
+  vmImage: windows-latest
+
+variables:
+  terraformWorkingDirectory: '$(System.DefaultWorkingDirectory)\Terraform-Kubernetes'
+
+stages:
+- stage: Provision
+  jobs:
+  - job: Terraform
+    steps:  
+
+    - task: AzureResourceManagerTemplateDeployment@3
+      displayName: 'Provision Terraform Resources'
+      inputs:
+        deploymentScope: 'Resource Group'
+        azureResourceManagerConnection: $(azureServicePrincipal)
+        subscriptionId: $(subscriptionId)
+        action: 'Create Or Update Resource Group'
+        resourceGroupName: '$(resourceGroupName) '
+        location: 'East US'
+        templateLocation: 'Linked artifact'
+        csmFile: $(armTemplate)
+        deploymentMode: 'Incremental'
+        deploymentOutputs: 'output'    
+    - pwsh: |
+        $outputsObject = $env:output | ConvertFrom-Json
+        Write-Host "##vso[task.setvariable variable=storageAccountKey]$($outputsObject.storageAccountKey.value)"
+      displayName: 'Get Storage Account Key'
+
+    - pwsh: |
+        echo $(storageAccountKey)
+      displayName: 'Echo Storage Account Key'
+
+    - task: TerraformInstaller@0
+      inputs:
+        terraformVersion: '0.12.31'
+
+    - task: TerraformTaskV2@2
+      displayName: 'Terraform Init'
+      inputs:
+        provider: 'azurerm'
+        command: 'init'
+        workingDirectory: '$(terraformWorkingDirectory)'
+        backendServiceArm: 'servicePrincipal-Azure'
+        backendAzureRmResourceGroupName: '$(resourceGroupName)'
+        backendAzureRmStorageAccountName: '$(storageAccountName)'
+        backendAzureRmContainerName: '$(storageContainerName)'
+        backendAzureRmKey: '$(storageAccountKey)'
+
+    - task: TerraformTaskV2@2
+      displayName: 'Terraform Plan'
+      inputs:
+        provider: 'azurerm'
+        command: 'plan'
+        workingDirectory: '$(terraformWorkingDirectory)'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+
+    - task: TerraformTaskV2@2
+      displayName: 'Terraform Apply'
+      inputs:
+        provider: 'azurerm'
+        command: 'apply'
+        workingDirectory: '$(terraformWorkingDirectory)'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
+
+    - task: TerraformTaskV2@2
+      displayName: 'Terraform Destroy'
+      inputs:
+        provider: 'azurerm'
+        command: 'destroy'
+        workingDirectory: '$(terraformWorkingDirectory)'
+        environmentServiceNameAzureRM: '$(azureServicePrincipal)'
